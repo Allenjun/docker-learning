@@ -1,0 +1,305 @@
+# 查看集群状态
+  GET _cluster/health
+
+  # 查看所有node
+    GET _cat/nodes
+
+  # 查看所有index
+    GET _cat/indices
+
+  # 创建index
+    PUT users
+
+  # 新增一条doc，doc_id自动生成
+    POST users/_doc
+  {
+    "user": "Mike",
+    "posr_date": "2019-05-15T14:12:12",
+    "message": "hello world"
+  }
+
+  # 新增一条doc_id为1的doc，若已存在该doc，则插入失败
+    PUT users/_create/1
+  {
+    "user": "Mike",
+    "posr_date": "2019-05-15T14:12:12",
+    "message": "hello world"
+  }
+
+  # 不存在该doc就新增，已存在该doc则覆盖
+    PUT users/_doc/1
+  {
+    "user": "Mike",
+    "posr_date": "2019-05-15T14:12:12",
+    "message": "hello world"
+  }
+
+  # 根据index、doc_id查询doc
+    GET users/_doc/1
+
+  # 更新doc数据，包括修改/添加字段
+    POST users/_update/1
+  {
+    "doc": {
+      "user": "allen",
+      "age": 18
+    }
+  }
+
+  # 删除指定doc_id的doc
+    DELETE users/_doc/1
+
+  # 批量操作，支持create/index/update/delete
+    POST _bulk
+  {"create":{"_index":"users","_id":"1"}}
+  {"name":"Mike"}
+  {"index":{"_index":"users","_id":"1"}}
+  {"name":"Mike"}
+  {"update":{"_index":"users","_id":"1"}}
+  {"doc":{"name":"allen","age":18}}
+  {"delete":{"_index":"users","_id":"1"}}
+
+    GET _mget
+  {
+    "docs":[
+    {"_index":"users", "_id":"Wnym3HMB7DHTWuo1ZG3K"},
+    {"_index":"movies", "_id":"791"}
+    ]
+  }
+
+  # 条件查询docs
+    GET users/_search
+  {"query": {"match_all": {}}, "from": 0, "size": 1}
+
+  # 批量条件查询docs
+    GET _msearch
+  {
+    "index": "users"
+  }
+  {
+    "query": {
+      "match_all": {}
+    }
+  }
+  {
+    "index": "movies"
+  }
+  {
+    "query": {
+      "match_all": {}
+    },
+    "from": 0,
+    "size": 10
+  }
+
+  # URI条件查询docs
+    GET movies/_search?q=title:Mike&sort=year:asc&from=0&size=5
+  {"profile": "true"}
+
+    GET movies/_search?q=2012&df=title
+    GET movies/_search?q=title:2012
+
+    GET movies/_search?q=title:"Beautiful Mind"
+
+    GET movies/_search?q=title:(Beautiful || Mind)
+    GET movies/_search?q=title:(Beautiful !Mind)
+    GET movies/_search?q=title:(Beautiful && Mind)
+    GET movies/_search?q=title:(+Beautiful -Mind)
+
+    GET movies/_search?q=year:>2012
+    GET movies/_search?q=year:{2012 TO 2018]
+
+    GET movies/_search?q=title:Last*
+    GET movies/_search?q=title:La?t
+
+    GET movies/_search
+  {
+    "sort": [
+    {
+      "year": {
+        "order": "asc"
+      }
+    }
+    ],
+    "from": 0,
+    "size": 5,
+    "query": {"match_all": {}}
+  }
+
+    GET movies/_search
+  {
+    "script_fields": {
+      "new_field": {
+        "script": {
+          "lang": "expression",
+          "source": "doc['year'].value ? 1 : 0"
+        }
+      }
+    },
+    "query": {"match_all": {}}
+  }
+
+    GET movies/_search
+  {
+    "query": {
+      "match_phrase": {
+        "title": {
+          "query": "Beautiful Mind",
+          "slop": 1
+        }
+      }
+    }
+  }
+
+    GET movies/_search
+  {
+    "query": {
+      "query_string": {
+        "default_field": "title",
+        "query": "Beautiful AND Mind"
+      }
+    }
+  }
+
+    GET movies/_mapping
+
+    PUT phone
+  {
+    "mappings": {
+      "properties": {
+        "mobile":{
+          "type": "keyword",
+          "index": false,
+          "index_options": "docs",
+          "null_value": "NULL"
+        }
+      }
+    }
+  }
+
+    POST _analyze
+  {
+    "analyzer": ""
+  }
+
+
+  # index template
+    PUT _template/test_default
+  {
+    "order": 0,
+    "index_patterns": [
+      "test-*"
+    ],
+    "settings": {
+      "index": {
+        "number_of_shards": "1"
+      }
+    },
+    "mappings": {
+      "dynamic_templates": [
+      {
+        "strings_as_keywords": {
+          "match": "*",
+          "mapping": {
+            "type": "keyword"
+          }
+        }
+      }
+      ],
+      "properties": {
+        "calendar_id": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+
+
+  # create index
+    PUT game
+  {
+    "mappings": {
+      "properties": {
+        "name": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "number_of_replicas": 1,
+      "number_of_shards": 2
+    }
+  }
+
+    GET kibana_sample_data_flights/_search?from=0&size=5
+
+  # Bucket / Metrics
+    GET kibana_sample_data_flights/_search
+  {
+    "aggs": {
+      "flight_dest": {
+        "terms": {
+          "field": "DestCountry"
+        }
+      }
+    }
+  }
+
+    GET kibana_sample_data_flights/_search
+  {
+    "aggs": {
+      "flight_dest": {
+        "terms": {
+          "field": "DestCountry"
+        },
+        "aggs": {
+          "avg_price": {
+            "avg": {
+              "field": "AvgTicketPrice"
+            }
+          },
+          "max_price": {
+            "max": {
+              "field": "AvgTicketPrice"
+            }
+          },
+          "min_price": {
+            "min": {
+              "field": "AvgTicketPrice"
+            }
+          }
+        }
+      }
+    }
+  }
+
+    GET kibana_sample_data_flights/_search
+  {
+    "size": 0,
+    "aggs": {
+      "flight_dest": {
+        "terms": {
+          "field": "DestCountry"
+        },
+        "aggs": {
+          "weather": {
+            "terms": {
+              "field": "DestWeather"
+            }
+          },
+          "stats_price": {
+            "stats": {
+              "field": "AvgTicketPrice"
+            }
+          }
+        }
+      }
+    }
+  }
+

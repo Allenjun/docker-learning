@@ -1,0 +1,94 @@
+version: '3.7'
+services:
+  redis:
+    image: redis
+    container_name: redis_01
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6379:6379
+      - 16379:16379
+    volumes:
+      - redis_data:/data
+      - /opt/redis-conf/redis_01.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - redis_network
+  redis2:
+    image: redis
+    container_name: redis_02
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6378:6378
+      - 16378:16378
+    volumes:
+      - redis2_data:/data
+      - /opt/redis-conf/redis_02.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - redis_network
+  redis3:
+    image: redis
+    container_name: redis_03
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6377:6377
+      - 16377:16377
+    volumes:
+      - redis3_data:/data
+      - /opt/redis-conf/redis_03.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - redis_network
+  redis4:
+    image: redis
+    container_name: redis_04
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6376:6376
+      - 16376:16376
+    volumes:
+      - redis4_data:/data
+      - /opt/redis-conf/redis_04.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - redis_network
+  redis5:
+    image: redis
+    container_name: redis_05
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6375:6375
+      - 16375:16375
+    volumes:
+      - redis5_data:/data
+      - /opt/redis-conf/redis_05.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - redis_network
+  redis6:
+    image: redis
+    container_name: redis_06
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6374:6374
+      - 16374:16374
+    volumes:
+      - redis6_data:/data
+      - /opt/redis-conf/redis_06.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - redis_network
+
+volumes:
+  redis_data:
+  redis2_data:
+  redis3_data:
+  redis4_data:
+  redis5_data:
+  redis6_data:
+
+networks:
+  redis_network:
+    driver: bridge
+
+#redis-cli --cluster create 192.168.30.104:6379 192.168.30.104:6378 192.168.30.104:6377 192.168.30.104:6376 192.168.30.104:6375 192.168.30.104:6374 --cluster-replicas 1
