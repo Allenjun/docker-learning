@@ -1,0 +1,90 @@
+version: '2'
+services:
+  kafka1:
+    image: wurstmeister/kafka
+    container_name: kafka1
+    ports:
+      - 9092:9092
+      - 1099:1099
+    restart: always
+    environment:
+      KAFKA_BROKER_ID: 1
+      ## 修改:宿主机IP
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.30.1
+      ## 修改:宿主机映射port
+      KAFKA_ADVERTISED_PORT: 9092
+      ## 绑定发布订阅的端口。修改:宿主机IP
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.30.1:9092
+      KAFKA_ZOOKEEPER_CONNECT: zoo1:2181,zoo2:2181,zoo3:2181
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=192.168.30.1 -Dcom.sun.management.jmxremote.rmi.port=1099"
+      JMX_PORT: 1099
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - kafka1data:/kafka
+    networks:
+      - zookeeper_zoo_net
+  kafka2:
+    image: wurstmeister/kafka
+    container_name: kafka2
+    ports:
+      - 9093:9092
+      - 1100:1099
+    restart: always
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.30.1
+      KAFKA_ADVERTISED_PORT: 9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.30.1:9093
+      KAFKA_ZOOKEEPER_CONNECT: zoo1:2181,zoo2:2181,zoo3:2181
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=192.168.30.1 -Dcom.sun.management.jmxremote.rmi.port=1099"
+      JMX_PORT: 1099
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - kafka2data:/kafka
+    networks:
+      - zookeeper_zoo_net
+  kafka3:
+    image: wurstmeister/kafka
+    container_name: kafka3
+    ports:
+      - 9094:9092
+      - 1101:1099
+    restart: always
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ADVERTISED_HOST_NAME: 192.168.30.1
+      KAFKA_ADVERTISED_PORT: 9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.30.1:9094
+      KAFKA_ZOOKEEPER_CONNECT: zoo1:2181,zoo2:2181,zoo3:2181
+      KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=192.168.30.1 -Dcom.sun.management.jmxremote.rmi.port=1099"
+      JMX_PORT: 1099
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - kafka3data:/kafka
+    networks:
+      - zookeeper_zoo_net
+  kafka-manager:
+    image: sheepkiller/kafka-manager
+    container_name: kafka-manager
+    ports:
+      - 9000:9000
+    restart: always
+    environment:
+      ZK_HOSTS: zoo2:2181
+      APPLICATION_SECRET: letmein
+      KM_ARGS: -Djava.net.preferIPv4Stack=true
+    volumes:
+      - kafkamanagerdata:/opt
+    networks:
+      - zookeeper_zoo_net
+
+
+networks:
+  zookeeper_zoo_net:
+    external: true
+
+volumes:
+  kafka1data:
+  kafka2data:
+  kafka3data:
+  kafkamanagerdata:

@@ -1,4 +1,36 @@
-version: '3.7'
+version: '3'
 services:
-  master:
-    image: mysql
+  mysql-master:
+    image: mysql:5.7
+    container_name: mysql-master
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - 3306:3306
+    volumes:
+      - ./cnf/master/my.cnf:/etc/mysql/my.cnf
+      - masterdata:/var/lib/mysql
+    networks:
+      - mysqlnet
+  mysql-slave:
+    image: mysql:5.7
+    container_name: mysql-slave
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - 3307:3306
+    volumes:
+      - ./cnf/slave/my.cnf:/etc/mysql/my.cnf
+      - slavedata:/var/lib/mysql
+    networks:
+      - mysqlnet
+
+volumes:
+  masterdata:
+  slavedata:
+
+networks:
+  mysqlnet:
+    driver: bridge

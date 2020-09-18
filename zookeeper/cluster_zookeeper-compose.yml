@@ -11,6 +11,8 @@ services:
       ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
     volumes:
       - zoo1data:/data
+    networks:
+      - zoo_net
   zoo2:
     image: zookeeper
     restart: always
@@ -22,6 +24,8 @@ services:
       ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=0.0.0.0:2888:3888;2181 server.3=zoo3:2888:3888;2181
     volumes:
       - zoo2data:/data
+    networks:
+      - zoo_net
   zoo3:
     image: zookeeper
     restart: always
@@ -33,11 +37,14 @@ services:
       ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=0.0.0.0:2888:3888;2181
     volumes:
       - zoo3data:/data
+    networks:
+      - zoo_net
 
 volumes:
   zoo1data:
-    driver: local
   zoo2data:
-    driver: local
   zoo3data:
-    driver: local
+
+networks:
+  zoo_net:
+    driver: bridge

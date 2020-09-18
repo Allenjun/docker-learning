@@ -1,0 +1,57 @@
+version: '2.2'
+services:
+  consul1:
+    image: consul
+    container_name: consul1
+    restart: always
+    ports:
+      - 8500:8500
+    command: agent -server -bootstrap-expect=3 -node=consul1 -bind=0.0.0.0 -client=0.0.0.0
+    networks:
+      - cluster
+    volumes:
+      - consul1data:/consul
+  consul2:
+    image: consul
+    container_name: consul2
+    restart: always
+    ports:
+      - 8501:8500
+    command: agent -server -retry-join=consul1 -bootstrap-expect=3 -node=consul2 -bind=0.0.0.0 -client=0.0.0.0
+    networks:
+      - cluster
+    volumes:
+      - consul3data:/consul
+  consul3:
+    image: consul
+    container_name: consul3
+    restart: always
+    ports:
+      - 8502:8500
+    command: agent -server -retry-join=consul1 -bootstrap-expect=3 -node=consul3 -bind=0.0.0.0 -client=0.0.0.0
+    networks:
+      - cluster
+    volumes:
+      - consul3data:/consul
+  consul-client:
+    image: consul
+    container_name: consul-client
+    restart: always
+    ports:
+      - 8503:8500
+    command: agent -retry-join=consul1 -node=consul-client -bind=0.0.0.0 -client=0.0.0.0 -ui
+    depends_on:
+      - consul1
+      - consul2
+      - consul3
+    networks:
+      - cluster
+
+volumes:
+  consul1data:
+  consul2data:
+  consul3data:
+
+networks:
+  cluster:
+    driver: bridge
